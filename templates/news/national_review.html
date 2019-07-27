@@ -1,0 +1,11 @@
+<body>
+	<h3>Latest National Review articles</h3>
+
+	<ul>
+		{% for hl in headlines %}
+		<li><a href="{{ hl.url }}">{{ hl.title }}</a> - {{ hl.datetime_scraped }}</li>
+		{% endfor %}
+	</ul>
+
+
+</body>
