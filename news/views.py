@@ -10,9 +10,9 @@ requests.packages.urllib3.disable_warnings()
 from bs4 import BeautifulSoup
 from datetime import timedelta, timezone, datetime
 
-# class IndexView(ListView):
-# 	model = Headline
-# 	template_name = 'news/index.html'
+class IndexView(ListView):
+	model = Headline
+	template_name = 'news/index.html'
 
 
 def view_reddit(request):
