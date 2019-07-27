@@ -7,11 +7,23 @@ import datetime
 # Create your models here.
 
 class Source(models.Model):
+
+	GOOD = 'G'
+	ERROR = 'E'
+	CRAWLING = 'C'
+	CURRENT_STATUS = (
+		(GOOD, 'good'), 
+		(ERROR, 'error'), 
+		(CRAWLING, 'running')
+		)
+
+
 	name = models.CharField(max_length=100)
 	slug = models.SlugField(max_length=30, unique=True)
 	url = models.URLField()
 	story_url = models.URLField(null=True)
 	last_crawled = models.DateTimeField(auto_now=True)
+	status = models.CharField(max_length=1, default=GOOD, choices=CURRENT_STATUS)
 
 	class Meta:
 		verbose_name = 'Media source'
@@ -30,7 +42,7 @@ class Headline(models.Model):
 	source = models.ForeignKey(Source, related_name='headlines', on_delete=models.CASCADE, null=True)
 	title = models.CharField(max_length=120)
 	image = models.ImageField(null=True)
-	url = models.URLField()
+	url = models.URLField(null=True)
 	datetime_scraped = models.DateTimeField(auto_now_add=True)
 	datetime_updated = models.DateTimeField(auto_now=True)
 

@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from . import clients
 from .models import Source, Headline
 
+# logger = logging.getLogger(__name__)
+
 
 class AbstractBaseCrawler(ABC):
 	def __init__(self, slug, client):
@@ -11,14 +13,19 @@ class AbstractBaseCrawler(ABC):
 
 	@abstractmethod
 	def update_headlines(self):
-		"""Crawls front page to check if headlines have changed"""
+		"""Crawls website for top headlines or stories"""
 
 	def crawl(self):
 		try:
+			self.source.status = Source.CRAWLING
+			self.source.save()
 			self.update_headlines()
+			self.source.status = Source.GOOD
 			self.source.save()
 		except:
-			print("Failed to crawl website.")
+			self.service.status = Source.ERROR
+			self.source.save()
+			# logger.exception('Error occurred while crawling website {self.source}.')
 
 
 class RedditCrawler(AbstractBaseCrawler):
@@ -35,5 +42,14 @@ class NationalReviewCrawler(AbstractBaseCrawler):
 		super().__init__('national-review', clients.NationalReviewClient())
 
 	def update_headlines(self):
-		headlines = self.client.get_front_page()
-		print(headlines)
+
+		try:
+			headlines = self.client.get_front_page()
+			for hl in headlines:
+				# Creates the headlin
+				h, _ = Headline.objects.get_or_create(source=self.source, title=hl['title'])
+				h.image = hl['img_source']
+				h.url = hl['link']
+				h.save()
+		except:
+			logger.exception('Error occurred while updating headlines for the National Review.')

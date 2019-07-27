@@ -37,7 +37,7 @@ class RedditClient(AbstractBaseClient):
 class NationalReviewClient(AbstractBaseClient):
 
 	def get_front_page(self):
-		headlines = []
+		results = []
 
 		r = requests.get('https://www.nationalreview.com/', headers=self.headers)
 		soup = BeautifulSoup(r.content, "html.parser")
@@ -66,15 +66,14 @@ class NationalReviewClient(AbstractBaseClient):
 				# local_filename = None
 				img_source = None
 
-			headline = Headline()
-
-			headline.title = title
-			headline.url = link
-			# headline.image = local_filename
-			headline.image = img_source
-			headlines.append(headline)
-
-		return headlines
+			data = {
+				'title': title,
+				'link': link,
+				'img_source': img_source,
+			}
+			results.append(data)
+			
+		return results
 
 
 
