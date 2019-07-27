@@ -28,7 +28,7 @@ def view_reddit(request):
 		'headlines': headlines,
 	}
 
-	return render(request, 'news/index.html', context=context_dict)
+	return render(request, 'news/reddit.html', context=context_dict)
 
 
 def view_nr(request):
