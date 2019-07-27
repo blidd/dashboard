@@ -5,6 +5,7 @@ from .models import Headline
 import os
 import logging
 import shutil
+from abc import ABC
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,7 +13,7 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 
-class AbstractBaseClient:
+class AbstractBaseClient(ABC):
 	def __init__(self):
 		self.headers = {
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
@@ -72,7 +73,7 @@ class NationalReviewClient(AbstractBaseClient):
 				'img_source': img_source,
 			}
 			results.append(data)
-			
+
 		return results
 
 

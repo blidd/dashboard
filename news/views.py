@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 
-from .models import Headline
+from .models import Source, Headline
 from .crawlers import NationalReviewCrawler, RedditCrawler
 
 import requests
@@ -20,7 +20,15 @@ def view_reddit(request):
 	reddit_crawler = RedditCrawler()
 	reddit_crawler.crawl()
 
-	return render(request, 'news/index.html', context={})
+	reddit = Source.objects.get(slug='reddit')
+	headlines = Headline.objects.filter(source=reddit).order_by('datetime_scraped')[:5]
+
+	context_dict = {
+		'source': reddit,
+		'headlines': headlines,
+	}
+
+	return render(request, 'news/index.html', context=context_dict)
 
 
 def view_nr(request):
@@ -28,7 +36,15 @@ def view_nr(request):
 	nr_crawler = NationalReviewCrawler()
 	nr_crawler.crawl()
 
-	return render(request, 'news/index.html', context={})
+	nr = Source.objects.get(slug='national-review')
+	headlines = Headline.objects.filter(source=nr).order_by('datetime_scraped')[:5]
+
+	context_dict = {
+		'source': nr,
+		'headlines': headlines,
+	}
+
+	return render(request, 'news/national_review.html', context=context_dict)
 
 
 # def scrape_national_review(request):
