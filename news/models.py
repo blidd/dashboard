@@ -1,12 +1,43 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.template.defaultfilters import slugify
+
+import datetime
 
 # Create your models here.
 
+class Source(models.Model):
+	name = models.CharField(max_length=100)
+	slug = models.SlugField(max_length=30, unique=True)
+	url = models.URLField()
+	story_url = models.URLField(null=True)
+	last_crawled = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = 'Media source'
+		verbose_name_plural = 'Media sources'
+		ordering = ('name',)
+
+	def __str__(self):
+		return self.name
+
+	def save(self, *args, **kwargs):
+		self.slug = slugify(self.name)
+		super().save(*args, **kwargs)
+
+
 class Headline(models.Model):
+	source = models.ForeignKey(Source, related_name='headlines', on_delete=models.CASCADE, null=True)
 	title = models.CharField(max_length=120)
-	image = models.ImageField()
-	url = models.TextField()
+	image = models.ImageField(null=True)
+	url = models.URLField()
+	datetime_scraped = models.DateTimeField(auto_now_add=True)
+	datetime_updated = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = 'Headline'
+		verbose_name_plural = 'Headlines'
+		ordering = ('title',)
 
 	def __str__(self):
 		return self.title

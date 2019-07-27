@@ -2,40 +2,69 @@ from django.shortcuts import render
 from django.views.generic import ListView
 
 from .models import Headline
+from .crawlers import NationalReviewCrawler, RedditCrawler
 
 import requests
 requests.packages.urllib3.disable_warnings()
+
 from bs4 import BeautifulSoup
+from datetime import timedelta, timezone, datetime
+
+# class IndexView(ListView):
+# 	model = Headline
+# 	template_name = 'news/index.html'
 
 
-class IndexView(ListView):
-	model = Headline
-	template_name = 'news/index.html'
+def view_reddit(request):
+
+	reddit_crawler = RedditCrawler()
+	reddit_crawler.crawl()
+
+	return render(request, 'news/index.html', context={})
 
 
-def scrape_national_review():
-	session = requests.Session()
-	session.headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"}
-	url = "https://www.nationalreview.com/"
+def view_nr(request):
+
+	nr_crawler = NationalReviewCrawler()
+	nr_crawler.crawl()
+
+	return render(request, 'news/index.html', context={})
+
+
+# def scrape_national_review(request):
+# 	# custom_user = CustomUser.objects.get(user=request.user)
+# 	# custom_user.last_scrape = datetime.now(timezone.utc)
+# 	# custom_user.save()
+
+# 	session = requests.Session()
+# 	session.headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"}
+# 	url = "https://www.nationalreview.com/"
 	
-	content = session.get(url, verify=False).content
+# 	content = session.get(url, verify=False).content
 
-	soup = BeautifulSoup(content, "html.parser")
-	articles = soup.select(".home-content-area__primary .post-list-article")
+# 	soup = BeautifulSoup(content, "html.parser")
+# 	articles = soup.select(".home-content-area__primary .post-list-article")
 
-	# links = []
-	for article in articles:
+# 	for article in articles:
 
-		try:
-			link = article.find_all('a')[2]['href']
-			title = article.find('h4').text.strip()
-			if article.find('img'):
-				img_source = article.find('img')['data-src']
-		except:
-			raise Exception(f'Failed to scrape {article}.')
+# 		title = article.find('h4').text.strip()
+# 		link = article.find_all('a')[2]['href']
+# 		try:
+# 			img_source = article.find('img')['data-src']
+# 		except:
+# 			print(f'Failed to scrape article image.')
+# 			img_source = None
 
-		print(title)
-		print(link)
-		print(img_source, '\n')
+# 		headline = Headline()
+# 		headline.title = title
+# 		headline.url = link
+# 		headline.image = img_source
+
+# 		# print(title)
+# 		# print(link)		
+# 		# print(img_source)
+# 		headline.save()
+
+# 	return render(request, 'news/index.html', context={})
 
 
