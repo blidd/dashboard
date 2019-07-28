@@ -5,7 +5,7 @@ from .models import Source, Headline
 from .crawlers import NationalReviewCrawler, RedditCrawler
 
 import requests
-requests.packages.urllib3.disable_warnings()
+# requests.packages.urllib3.disable_warnings()
 
 from bs4 import BeautifulSoup
 from datetime import timedelta, timezone, datetime
@@ -20,7 +20,7 @@ def view_reddit(request):
 	reddit_crawler.crawl()
 
 	reddit = Source.objects.get(slug='reddit')
-	headlines = Headline.objects.filter(source=reddit).order_by('datetime_scraped')[:10]
+	headlines = Headline.objects.filter(source=reddit).order_by('-datetime_scraped')[:10]
 
 	context_dict = {
 		'source': reddit,
@@ -35,7 +35,7 @@ def view_nr(request):
 	nr_crawler.crawl() 
 
 	nr = Source.objects.get(slug='national-review')
-	headlines = Headline.objects.filter(source=nr).order_by('datetime_scraped')[:10]
+	headlines = Headline.objects.filter(source=nr).order_by('-datetime_scraped')[:10]
 
 	context_dict = {
 		'source': nr,

@@ -1,8 +1,13 @@
 from abc import ABC, abstractmethod
 
-from . import clients
+# from . import clients
 from .models import Source, Headline
 
+import requests
+from bs4 import BeautifulSoup
+
+import os
+import shutil
 import logging
 logger = logging.getLogger(__name__)
 
@@ -27,22 +32,30 @@ class AbstractBaseCrawler(ABC):
 		self._status = s
 
 	@abstractmethod
+	def get_top_stories(self):
+		"""Retrieve data of stories on front page or top stories."""
+
+	@abstractmethod
 	def update_headlines(self):
 		"""Crawls website for top headlines or stories"""
 
 	def crawl(self):
 		try:
-			self.client.status = 'CRAWLING'
+			self.status = 'CRAWLING'
 			self.update_headlines()
-			self.client.status = 'GOOD'
+			self.status = 'GOOD'
 		except:
-			self.client.status = 'ERROR'
+			self.status = 'ERROR'
 			logger.exception('Error occurred while crawling {self.source}.')
 
 
 class RedditCrawler(AbstractBaseCrawler):
 	def __init__(self):
 		super().__init__('reddit')
+
+	def update_headlines(self):
+		stories = self.get_top_stories()
+		print(stories)
 
 	def get_top_stories(self):
 		stories = []
@@ -54,10 +67,6 @@ class RedditCrawler(AbstractBaseCrawler):
 			logger.exception("Error occurred while querying Reddit API")
 		return stories
 
-	def update_headlines(self):
-		stories = self.get_top_stories()
-		print(stories)
-
 
 class NationalReviewCrawler(AbstractBaseCrawler):
 	def __init__(self):
@@ -65,7 +74,7 @@ class NationalReviewCrawler(AbstractBaseCrawler):
 
 	def update_headlines(self):
 		try:
-			headlines = self.get_front_page()
+			headlines = self.get_top_stories()
 			for hl in headlines:
 				# Creates the headline if it does not exist, otherwise just updates existing one
 				h, _ = Headline.objects.get_or_create(source=self.source, title=hl['title'])
@@ -75,7 +84,7 @@ class NationalReviewCrawler(AbstractBaseCrawler):
 		except: 
 			logger.exception('Error occurred while updating headlines for the National Review.')
 
-	def get_front_page(self):
+	def get_top_stories(self):
 		results = []
 
 		r = requests.get('https://www.nationalreview.com/', headers=self.headers)
