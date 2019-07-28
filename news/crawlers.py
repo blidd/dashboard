@@ -16,17 +16,13 @@ class AbstractBaseCrawler(ABC):
 	def update_headlines(self):
 		"""Crawls website for top headlines or stories"""
 
-	def update_status(self, status):
-		self.source.status = status
-		self.source.save()
-
 	def crawl(self):
 		try:
-			self.update_status(Source.CRAWLING)
+			self.client.status = 'CRAWLING'
 			self.update_headlines()
-			self.update_status(Source.GOOD)
+			self.client.status = 'GOOD'
 		except:
-			slef.update_status(Source.ERROR)
+			self.client.status = 'ERROR'
 			logger.exception('Error occurred while crawling {self.source}.')
 
 

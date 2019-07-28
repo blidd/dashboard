@@ -5,7 +5,7 @@ from .models import Headline
 import os
 import logging
 import shutil
-from abc import ABC
+# from abc import ABC, abstractmethod
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,11 +13,24 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 
-class AbstractBaseClient(ABC):
-	def __init__(self):
+class AbstractBaseClient:
+
+	def __init__(self, status='GOOD'):
 		self.headers = {
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
 		}
+		self.status = status
+
+	@property
+	def status(self):
+		return self._status
+	
+	@status.setter
+	def status(self, s):
+		available_statuses = ['GOOD', 'CRAWLING', 'ERROR']
+		if s not in available_statuses:
+			return ValueError('Status is not valid.')
+		self._status = s
 
 
 class RedditClient(AbstractBaseClient):
@@ -30,7 +43,7 @@ class RedditClient(AbstractBaseClient):
 			results = r.json()
 			stories = results['data']['children']
 		except ValueError:
-			print("Error occurred while querying Reddit API")
+			logger.exception("Error occurred while querying Reddit API")
 
 		return stories
 
