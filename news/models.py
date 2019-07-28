@@ -60,3 +60,4 @@ class CustomUser(AbstractUser):
 
 	def __str__(self):
 		return f"{self.user}-{self.last_scrape}"
+

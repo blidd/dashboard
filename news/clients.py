@@ -72,8 +72,8 @@ class NationalReviewClient(AbstractBaseClient):
 				'link': link,
 				'img_source': img_source,
 			}
-			results.append(data)
 
+			results.append(data)
 		return results
 
 

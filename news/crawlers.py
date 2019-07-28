@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 from . import clients
 from .models import Source, Headline
 
-# logger = logging.getLogger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 class AbstractBaseCrawler(ABC):
@@ -15,17 +16,18 @@ class AbstractBaseCrawler(ABC):
 	def update_headlines(self):
 		"""Crawls website for top headlines or stories"""
 
+	def update_status(self, status):
+		self.source.status = status
+		self.source.save()
+
 	def crawl(self):
 		try:
-			self.source.status = Source.CRAWLING
-			self.source.save()
+			self.update_status(Source.CRAWLING)
 			self.update_headlines()
-			self.source.status = Source.GOOD
-			self.source.save()
+			self.update_status(Source.GOOD)
 		except:
-			self.service.status = Source.ERROR
-			self.source.save()
-			# logger.exception('Error occurred while crawling website {self.source}.')
+			slef.update_status(Source.ERROR)
+			logger.exception('Error occurred while crawling {self.source}.')
 
 
 class RedditCrawler(AbstractBaseCrawler):
