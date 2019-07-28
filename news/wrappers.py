@@ -15,22 +15,10 @@ logger = logging.getLogger(__name__)
 
 class AbstractBaseClient:
 
-	def __init__(self, status='GOOD'):
+	def __init__(self):
 		self.headers = {
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
 		}
-		self.status = status
-
-	@property
-	def status(self):
-		return self._status
-	
-	@status.setter
-	def status(self, s):
-		available_statuses = ['GOOD', 'CRAWLING', 'ERROR']
-		if s not in available_statuses:
-			return ValueError('Status is not valid.')
-		self._status = s
 
 
 class RedditClient(AbstractBaseClient):
@@ -50,7 +38,7 @@ class RedditClient(AbstractBaseClient):
 
 class NationalReviewClient(AbstractBaseClient):
 
-	def get_front_page(self):
+	def get_top_stories(self):
 		results = []
 
 		r = requests.get('https://www.nationalreview.com/', headers=self.headers)
