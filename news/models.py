@@ -30,6 +30,9 @@ class Source(models.Model):
 		verbose_name_plural = 'Media sources'
 		ordering = ('name',)
 
+	def __repr__(self):
+		return f'{__class__.__name__}({self.name!r}, {self.status!r})'
+
 	def __str__(self):
 		return self.name
 
@@ -50,6 +53,9 @@ class Headline(models.Model):
 		verbose_name = 'Headline'
 		verbose_name_plural = 'Headlines'
 		ordering = ('title',)
+
+	def __repr__(self):
+		return f'{__class__.__name__}({self.title!r}, {self.source!r})'
 
 	def __str__(self):
 		return self.title

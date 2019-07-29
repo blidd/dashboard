@@ -24,6 +24,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     url(r'^admin/', admin.site.urls),
     url(r'^news/', include('news.urls')),
+    url(r'^api/todos/', include('todos.urls')),
 ]
 
 if settings.DEBUG:
