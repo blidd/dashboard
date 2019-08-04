@@ -61,9 +61,9 @@ class Headline(models.Model):
 		return self.title
 
 
-class CustomUser(AbstractUser):
-	last_scrape = models.DateTimeField(null=True, blank=True)
+# class CustomUser(AbstractUser):
+# 	last_scrape = models.DateTimeField(null=True, blank=True)
 
-	def __str__(self):
-		return f"{self.user}-{self.last_scrape}"
+# 	def __str__(self):
+# 		return f"{self.user}-{self.last_scrape}"
 

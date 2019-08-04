@@ -44,9 +44,11 @@ INSTALLED_APPS = [
     
     # 3rd party
     'rest_framework',
+    'corsheaders',
 
     'news.apps.NewsConfig',
     'todos.apps.TodosConfig',
+    'posts.apps.PostsConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -57,6 +59,8 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,6 +69,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+]
+
 
 ROOT_URLCONF = 'dashboard.urls'
 
@@ -144,5 +153,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
 
-# Changes the user model for the project to our custom user model rather than the default
-AUTH_USER_MODEL = 'news.CustomUser'
+# # Changes the user model for the project to our custom user model rather than the default
+# AUTH_USER_MODEL = 'news.CustomUser'
