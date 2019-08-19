@@ -14,27 +14,20 @@ logger = logging.getLogger(__name__)
 
 class AbstractBaseCrawler(ABC):
 	def __init__(self, slug, client, status='GOOD'):
-		self.headers = {
-			"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
-		}
 		self.source = Source.objects.get(slug=slug)
 		self.client = client
-		self.status = status
+		# self.status = status
 
-	@property
-	def status(self):
-		return self._status
+	# @property
+	# def status(self):
+	# 	return self._status
 	
-	@status.setter
-	def status(self, s):
-		available_statuses = ['GOOD', 'CRAWLING', 'ERROR']
-		if s not in available_statuses:
-			return ValueError('Status is not valid.')
-		self._status = s
-
-	# @abstractmethod
-	# def get_top_stories(self):
-	# 	"""Retrieve data of stories on front page or top stories."""
+	# @status.setter
+	# def status(self, s):
+	# 	available_statuses = ['GOOD', 'CRAWLING', 'ERROR']
+	# 	if s not in available_statuses:
+	# 		return ValueError('Status is not valid.')
+	# 	self._status = s
 
 	@abstractmethod
 	def update_headlines(self):
@@ -42,12 +35,12 @@ class AbstractBaseCrawler(ABC):
 
 	def crawl(self):
 		try:
-			self.status = 'CRAWLING'
+			# self.status = 'CRAWLING'
 			self.update_headlines()
-			self.status = 'GOOD'
+			# self.status = 'GOOD'
 		except:
-			self.status = 'ERROR'
-			logger.exception('Error occurred while crawling {self.source}.')
+			# self.status = 'ERROR'
+			logger.exception(f'Error occurred while crawling {self.source}.')
 
 
 class RedditCrawler(AbstractBaseCrawler):

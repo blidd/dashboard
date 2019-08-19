@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # 3rd party
     'rest_framework',
     'corsheaders',
+    'django_celery_beat',
 
     'news.apps.NewsConfig',
     'todos.apps.TodosConfig',
@@ -152,6 +153,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
-
 # # Changes the user model for the project to our custom user model rather than the default
 # AUTH_USER_MODEL = 'news.CustomUser'
+
+# Celery & Redis configs
+
+CELERY_IMPORTS = ("news.tasks","news.wrappers")
+CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'

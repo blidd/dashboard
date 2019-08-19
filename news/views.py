@@ -10,9 +10,16 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import timedelta, timezone, datetime
 
+from news.tasks import crawl_news_task
+
 class IndexView(ListView):
 	model = Headline
 	template_name = 'news/index.html'
+
+
+# def view_crawl(request):
+# 	crawl_news_task()
+# 	return render(request, 'news/national_review.html', context={})
 
 
 def view_reddit(request):
