@@ -10,16 +10,12 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def crawl_news_task():
-	for c in wrappers.client_registry:
-		_crawl(c)
-
-
-def _crawl(client):
-	client_instance = client()
-	top_stories = client_instance.get_top_stories()
-	for stories in top_stories:
-		h, _ = Headline.objects.get_or_create(
-			source=client_instance.source, 
-			title=stories['title'],
-			# image=stories['img_source'],
-			url=stories['link'])
+	for client in wrappers.client_registry:
+		client_instance = client()
+		top_stories = client_instance.get_top_stories()
+		
+		for s in top_stories:
+			h, _ = Headline.objects.get_or_create(
+				source=client_instance.source, 
+				title=s['title'],
+				url=s['link'])
