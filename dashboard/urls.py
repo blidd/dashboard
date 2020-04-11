@@ -24,7 +24,6 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     url(r'^admin/', admin.site.urls),
     url(r'^news/', include('news.urls')),
-    url(r'^api/v1/todos/', include('todos.urls')),
     url(r'^api/v1/posts/', include('posts.urls')),
 ]
 

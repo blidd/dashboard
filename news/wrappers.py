@@ -1,11 +1,7 @@
-from django.utils import timezone
-from news.models import Source, Headline
+from news.models import Source
+from django.template.defaultfilters import slugify
 import secret
 
-import os
-import shutil
-import inspect
-import sys
 from abc import ABC, abstractmethod
 
 import requests
@@ -13,6 +9,18 @@ from bs4 import BeautifulSoup
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+# String const variables
+
+REDDIT_NAME = 'Reddit'
+REDDIT_BASE_URL = 'https://oauth.reddit.com/api/v1'
+
+NYTIMES_NAME = 'New York Times'
+NYTIMES_BASE_URL = 'https://api.nytimes.com'
+
+NATIONAL_REVIEW_NAME = 'National Review'
+NATIONAL_REVIEW_BASE_URL = 'https://www.nationalreview.com'
 
 
 client_registry = set()
@@ -31,15 +39,17 @@ def register_client(active=True):
 
 class AbstractBaseClient(ABC):
 
-    def __init__(self, source, base_url, url_path, url_params):
-        self.source = source
-        self.url = build_url(base_url, url_path, url_params)
+    def __init__(self):
         self.headers = {
-            "User-Agent": "DashboardNewsClient/0.0.1 by BLi/Technolojeezus"}
+            "User-Agent": "DashboardNewsClient/0.0.1 by BLi/Technolojeezus"
+        }
 
     @staticmethod
-    def build_url(base_url, url_path, url_params):
-        return self.base_url + self.url_path + '?' + '&'.join([f'{param}={value}' for param, value in url_params.items()])
+    def build_url(base_url, url_path, url_params=None):
+        return base_url + url_path + '?' + '&'.\
+            join([f'{param}={value}'
+                  for param, value in url_params.items()]) \
+            if url_params else base_url + url_path
 
     @abstractmethod
     def get_top_stories(self):
@@ -49,15 +59,16 @@ class AbstractBaseClient(ABC):
 @register_client(active=False)
 class RedditClient(AbstractBaseClient):
 
-    def __init__(self, url_path, url_params=None):
-        super().__init__(
-            Source.objects.get(slug='reddit'),
-            'https://oauth.reddit.com/api/v1',
-            url_path,
-            url_params,
-        )
+    def __init__(self):
+        super().__init__()
 
-        # Request and add Reddit access token to request header for Application-Only OAuth
+        self.source, _ = Source.objects.get_or_create(
+            name=REDDIT_NAME,
+            slug=slugify(REDDIT_NAME),
+            url=REDDIT_BASE_URL)
+
+        # Request and add Reddit access token to request header for
+        # Application-Only OAuth
         r = requests.post(
             'https://www.reddit.com/api/v1/access_token',
             data={'grant_type': 'client_credentials'},
@@ -67,19 +78,21 @@ class RedditClient(AbstractBaseClient):
         try:
             token = r.json()['access_token']
             self.headers['Authorization'] = 'bearer ' + token
-        except ValueError:
+        except ValueError as e:
             logger.exception(
+                e,
                 "Error occurred while requesting Reddit access token.")
 
-    @classmethod
-    def subreddit_learnjavascript(cls):
-        return cls('/r/learnjavascript/hot', {'limit': 5})
+    # **WARNING**: totally untested
+    def get_subreddit_learnjavascript(self):
 
-    # Query the most popular posts off Reddit
-    def get_top_stories(self):
+        url = self.build_url(
+            self.source.url,
+            '/r/learnjavascript/hot',
+            {'limit': 5}
+        )
 
-        # try:
-        response = requests.get(self.url, headers=self.headers)
+        response = requests.get(url, headers=self.headers)
         try:
             results = response.json()['data']['children']
             stories = [{'title': r['data']['title'], 'link': 'https://www.reddit.com' +
@@ -87,25 +100,46 @@ class RedditClient(AbstractBaseClient):
             return stories
         except ValueError:
             logger.exception(
-                f'Error occurred while querying Reddit API at {self.url}')
+                f'Error occurred while querying Reddit API at {url}')
+            return None
+
+    # Query the most popular posts off Reddit
+    def get_top_stories(self):
+        url = self.build_url(self.source.url, '/subreddits/popular')
+
+        response = requests.get(url, headers=self.headers)
+        try:
+            results = response.json()['data']['children']
+            stories = [{'title': r['data']['title'], 'link': 'https://www.reddit.com' +
+                        r['data']['permalink']} for r in results]
+            return stories
+        except ValueError:
+            logger.exception(
+                f'Error occurred while querying Reddit API at {url}')
             return None
 
 
 @register_client()
 class NYTimesClient(AbstractBaseClient):
 
-    def __init__(self, url_path, url_params={'api-key': secret.nytimes_api_key}):
-        return super().__init__(
-            Source.objects.get(slug='new-york-times'),
-            'https://api.nytimes.com/svc/topstories/v2/home.json',
-            url_path,
-            url_params,
-        )
+    def __init__(self):
+        super().__init__()
+
+        self.source, _ = Source.objects.get_or_create(
+            name=NYTIMES_NAME,
+            slug=slugify(NYTIMES_NAME),
+            url=NYTIMES_BASE_URL)
 
     def get_top_stories(self):
+        url = self.build_url(
+            self.source.url,
+            '/svc/topstories/v2/home.json',
+            {'api-key': secret.nytimes_api_key}
+        )
+
         sections = ('Climate', 'Business', 'Politics', 'World')
 
-        response = requests.get(self.url, headers=self.headers)
+        response = requests.get(url, headers=self.headers)
         results = response.json()['results']
         stories = [{'title': r['title'], 'url': r['url']}
                    for r in results if r['section'] in sections]
@@ -116,20 +150,26 @@ class NYTimesClient(AbstractBaseClient):
 class NationalReviewClient(AbstractBaseClient):
 
     def __init__(self, url_params=None):
-        return super().__init__(
-            Source.objects.get(slug='national-review'),
-            'https://nationalreview.com',
-            url_params
-        )
+        super().__init__()
+
+        self.source, _ = Source.objects.get_or_create(
+            name=NATIONAL_REVIEW_NAME,
+            slug=slugify(NATIONAL_REVIEW_NAME),
+            url=NATIONAL_REVIEW_BASE_URL)
 
     def get_top_stories(self):
-        stories = []
 
-        r = requests.get(self.url, headers=self.headers)
+        url = self.build_url(
+            self.source.url,
+            ''
+        )
+
+        r = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(r.content, "html.parser")
         articles = soup.select(
             '.home-content-area__primary .post-list-article')
 
+        stories = []
         for article in articles:
             title = article.find('h4').text.strip()
             link = article.find_all('a')[2]['href']
