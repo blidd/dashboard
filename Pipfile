@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 beautifulsoup4 = "==4.8.0"
-djangorestframework = "==3.10.1"
+djangorestframework = "==3.11.2"
 requests = "==2.22.0"
 celery = "==4.3.0"
 redis = "==3.3.7"
